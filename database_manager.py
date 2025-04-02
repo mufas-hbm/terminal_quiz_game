@@ -2,6 +2,22 @@ import psycopg2
 
 class DatabaseManager:
     def __init__(self, dbname, user, password, host, port):
+        """
+        Initializes the database connection parameters.
+
+        Stores the provided credentials and connection details for establishing
+        a connection to the PostgreSQL database.
+
+        Args:
+            dbname (str): Name of the database.
+            user (str): Username for database authentication.
+            password (str): Password for database authentication.
+            host (str): Database server host address.
+            port (int): Port number for database connection.
+
+        Attributes:
+            conn (NoneType): Placeholder for the database connection, initially set to None.
+        """
         self.dbname = dbname
         self.user = user
         self.password = password
@@ -10,6 +26,15 @@ class DatabaseManager:
         self.conn = None
 
     def connect(self):
+        """
+        Establishes a connection to the PostgreSQL database.
+
+        Uses the provided database credentials to initiate a connection.
+        If an error occurs during connection, logs an error message.
+
+        Raises:
+            Exception: Logs an error message if connecting to the database fails.
+        """
         try:
             self.conn = psycopg2.connect(
                 dbname=self.dbname,
@@ -22,6 +47,15 @@ class DatabaseManager:
             print("Error connecting to the database:", e)
 
     def close(self):
+        """
+        Closes the database connection if it exists.
+
+        Ensures that the database connection is safely closed to free up resources.
+        If an error occurs during closing, it logs an error message.
+
+        Raises:
+            Exception: Logs an error message if closing the connection fails.
+        """
         try:
             if self.conn:
                 self.conn.close()
@@ -150,6 +184,19 @@ class DatabaseManager:
             return []  # Return an empty list in case of error
     
     def fetch_answers_from_question(self, question):
+        """
+        Retrieves all possible answers for a given question from the database.
+
+        Args:
+            question (str): The text of the question for which answers should be fetched.
+
+        Returns:
+            list: A list of answer choices related to the question.
+                Returns an empty list if an error occurs or no answers are found.
+
+        Raises:
+            Exception: Logs an error message if fetching answers fails.
+        """
         try:
             with self.conn.cursor() as cursor:  # Automatically closes the cursor after the queries
                 query = "SELECT answer FROM answers JOIN questions ON answers.question_id=questions.question_id WHERE question_text=%s;"
@@ -159,42 +206,21 @@ class DatabaseManager:
         except Exception as e:
             print("Error fetching questions:", e)
             return []  # Return an empty list in case of error
-
-    def get_choice(self, category, id, parent_id=None):
-        """
-        Fetches the name for the given category and IDs from the database.
-
-        Args:
-            category (str): The category to fetch (e.g., "topic", "module", "submodule").
-            id (int): The ID of the category.
-            parent_id (int, optional): The parent ID for hierarchical relationships.
-
-        Returns:
-            list: A list of names fetched from the database, or None on failure.
-        """
-        try:
-            with self.conn.cursor() as cursor:
-                if parent_id:
-                    # Define parent column based on category
-                    parent_column = "topic_id" if category == "module" else "module_id" if category == "submodule" else None
-                    if parent_column:
-                        query = f"""
-                            SELECT {category}_name
-                            FROM {category}s
-                            WHERE {category}_id = %s AND {parent_column} = %s;
-                        """
-                        cursor.execute(query, (id, parent_id))
-                else:
-                    query = f"SELECT {category}_name FROM {category}s WHERE {category}_id = %s;"
-                    cursor.execute(query, (id,))
-                
-                output = [row[0] for row in cursor.fetchall()]
-                return output
-        except Exception as e:
-            print(f"Error fetching {category}: {e}")
-            return None
         
     def check_user_answer(self, user_answer):
+        """
+        Checks whether the user's answer matches the correct answer stored in the database.
+
+        Args:
+            user_answer (str): The answer provided by the user.
+
+        Returns:
+            str: The correct answer if found in the database.
+            list: An empty list if an error occurs during the query execution.
+
+        Raises:
+            Exception: Logs an error message if fetching the correct answer fails.
+        """
         try:
             with self.conn.cursor() as cursor:  # Automatically closes the cursor after the queries
                 query = "SELECT right_answer FROM answers WHERE answer=%s;"
@@ -207,6 +233,16 @@ class DatabaseManager:
             return []  # Return an empty list in case of error
 
     def create_database_dict(self):
+        """
+        Creates a nested dictionary structure representing topics, modules, and submodules.
+
+        Args:
+            db_manager: An instance of a database manager that provides methods to fetch topics, modules, and submodules.
+
+        Returns:
+            dict: A dictionary where each topic has associated modules and submodules.
+                Returns an empty dictionary if no topics are found or an error occurs.
+        """
         db_dict = {}
         try:
             topics = self.fetch_topics()

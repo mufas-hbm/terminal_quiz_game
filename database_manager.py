@@ -64,32 +64,12 @@ class DatabaseManager:
             print("Error closing the database:", e)
     
     def fetch_submodules_add_questions(self):
-        """
-        Fetches a list of submodule names from the 'submodules' table in the database.
-
-        This method establishes a database connection, executes a query to retrieve
-        all submodule names, and returns the results as a list. In case of an error
-        (e.g., connection failure or query issue), it catches the exception and returns
-        an empty list.
-
-        Returns:
-            list: A list of submodule names fetched from the database. Returns an 
-                empty list if an error occurs during database interaction.
-        """
-        try:
-            with self.conn.cursor() as cursor:  # Automatically closes the cursor after the queries
-                query = """
+        query = """
                     SELECT submodule_name
                     FROM submodules;
                 """
-                cursor.execute(query)  # Add a trailing comma to make it a tuple
-                submodules = [row[0] for row in cursor.fetchall()]  # Fetch all rows and extract submodule names
-            return submodules
-        except Exception as e:
-            print("Error fetching submodules:", e)
-            return []  # Return an empty list in case of error
+        return self.fetch_data(query)
 
-    
     def fetch_data(self, query, params=()):
         """Executes a SQL query and returns results as a list."""
         try:
@@ -255,28 +235,9 @@ class DatabaseManager:
         return self.fetch_data(query, (question,)) 
                
     def check_user_answer(self, user_answer):
-        """
-        Checks whether the user's answer matches the correct answer stored in the database.
-
-        Args:
-            user_answer (str): The answer provided by the user.
-
-        Returns:
-            str: The correct answer if found in the database.
-            list: An empty list if an error occurs during the query execution.
-
-        Raises:
-            Exception: Logs an error message if fetching the correct answer fails.
-        """
-        try:
-            with self.conn.cursor() as cursor:  # Automatically closes the cursor after the queries
-                query = "SELECT right_answer FROM answers WHERE answer=%s;"
-                cursor.execute(query,(user_answer, ))
-                answer = cursor.fetchone()[0]
-            return answer
-        except Exception as e:
-            print("Error fetching questions:", e)
-            return []  # Return an empty list in case of error
+        query = "SELECT right_answer FROM answers WHERE answer=%s;"
+        return self.fetch_data(query,(user_answer, ))
+        
 
     # def create_database_dict(self):
     #     """
@@ -327,3 +288,51 @@ class DatabaseManager:
         elif level == "submodules" and parent:
             return self.fetch_submodules(parent)
         return []  # Default empty list for invalid inputs
+    
+    def get_name_actual_user(self, user_id):
+        query = """
+            SELECT name
+            FROM users
+            WHERE user_id=%s;"""
+        return self.fetch_data(query, (user_id,))
+    
+    def log_user(self, username, password):
+        query = """
+        SELECT user_id 
+        FROM user_log
+        WHERE username=%s AND hashed_password=%s;
+        """
+        return self.fetch_data(query, (username, password))
+
+    def add_score_to_user(self, score, user):
+        query = """
+            UPDATE users
+            SET total_score = total_score + %s,
+                last_score = %s,
+                total_matchs = total_matchs +1"
+            WHERE name = %s;
+        """
+        try:
+            with self.conn.cursor() as cursor:
+                cursor.execute(query, (score, score, user))
+                self.conn.commit()  # Ensure the update is saved
+                return cursor.rowcount  # Return number of affected rows
+        except Exception as e:
+            logging.error(f"Failed to update score status for {user}: {e}")
+            return 0  # Indicate failure)
+    
+    def set_logged_status(self, name, is_logged_in):
+        """Updates the logged status of a user."""
+        query = """
+            UPDATE users
+            SET logged = %s
+            WHERE name = %s;
+        """
+        try:
+            with self.conn.cursor() as cursor:
+                cursor.execute(query, (is_logged_in, name))
+                self.conn.commit()  # Ensure the update is saved
+                return cursor.rowcount  # Return number of affected rows
+        except Exception as e:
+            logging.error(f"Failed to update logged status for {name}: {e}")
+            return 0  # Indicate failure)

@@ -290,6 +290,19 @@ class DatabaseManager:
         return []  # Default empty list for invalid inputs
     
     def get_name_actual_user(self, user_id):
+        """
+        Retrieves the name of the user associated with the given user ID.
+
+        Args:
+            user_id (int): The unique identifier of the user.
+
+        Returns:
+            str: The name of the user if found, otherwise None.
+        
+        Example:
+            user_name = get_name_actual_user(5)
+            print(user_name)  # Output: "John Doe"
+        """
         query = """
             SELECT name
             FROM users
@@ -335,4 +348,80 @@ class DatabaseManager:
                 return cursor.rowcount  # Return number of affected rows
         except Exception as e:
             logging.error(f"Failed to update logged status for {name}: {e}")
+            return 0  # Indicate failure)
+    
+    ### admin functions ###
+
+    def get_category_id(self, category, category_name):
+        """
+        Retrieves the category ID for the specified category name.
+
+        Args:
+            category (str): The category type (module or submodule).
+            category_name (str): The name of the category to retrieve.
+
+        Returns:
+            int: The category ID if found, otherwise None.
+        """
+        query = f"""
+        SELECT {category}_id 
+        FROM {category}s
+        WHERE {category}_name=%s;
+        """
+        result = self.fetch_data(query, (category_name,))
+
+        #check result is a single integer
+        if result:
+            return result[0] #extract the first value of a list
+        return None
+
+    def add_new_topic(self, topic, description=None):
+        """
+        Adds a new topic to the topics database table.
+
+        Args:
+            topic (str): The name of the new topic.
+            description (str): A brief description of the topic.
+
+        Returns:
+            int: The number of affected rows (1 if successful, 0 if failed).
+        """
+        query = """
+            INSERT INTO topics (topic_name, topic_description)
+            VALUES (%s, %s);      
+        """
+        try:
+            with self.conn.cursor() as cursor:
+                cursor.execute(query, (topic, description))
+                self.conn.commit()  # Ensure the update is saved
+                return cursor.rowcount  # Return number of affected rows
+        except Exception as e:
+            logging.error(f"Failed to insert data into topics: {e}")
+            return 0  # Indicate failure)
+        
+    def add_new_category(self, parent_id, parent_name, category, category_name, description=None):
+        """
+        Inserts a new category entry into the specified database table.
+
+        Args:
+            parent_id (int): The unique identifier of the parent category (e.g., topic ID for modules).
+            parent_name (str): The name of the parent entity (e.g., 'topic' for modules).
+            category (str): The database table name where the category should be inserted (e.g., 'topic' or 'module').
+            category_name (str): The name of the new category to be added.
+            description (str, optional): A brief description of the new category. Defaults to None.
+
+        Returns:
+            int: The number of affected rows (1 if the insertion is successful, 0 if it fails).
+        """
+        query = f"""
+            INSERT INTO {category}s ({parent_name}_id, {category}_name, {category}_description)
+            VALUES (%s, %s, %s);      
+        """
+        try:
+            with self.conn.cursor() as cursor:
+                cursor.execute(query, (parent_id, category_name, description))
+                self.conn.commit()  # Ensure the update is saved
+                return cursor.rowcount  # Return number of affected rows
+        except Exception as e:
+            logging.error(f"Failed to insert data into {category}s: {e}")
             return 0  # Indicate failure)

@@ -1,6 +1,13 @@
 import psycopg2
 import logging
 
+# Configure logging to write errors to a file
+logging.basicConfig(
+    filename='error.log',
+    level=logging.ERROR,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+
 class DatabaseManager:
     def __init__(self, dbname, user, password, host, port):
         """
@@ -77,6 +84,8 @@ class DatabaseManager:
                 cursor.execute(query, params)
                 return [row[0] for row in cursor.fetchall()]
         except Exception as e:
+            #revert changes made during the current transaction if this didn't execute well
+            self.conn.rollback()
             logging.error(f"Database query failed: {e}")
             return []  # Return empty list on failure
     
@@ -322,7 +331,7 @@ class DatabaseManager:
             UPDATE users
             SET total_score = total_score + %s,
                 last_score = %s,
-                total_matchs = total_matchs +1"
+                total_matchs = total_matchs +1
             WHERE name = %s;
         """
         try:
@@ -331,6 +340,8 @@ class DatabaseManager:
                 self.conn.commit()  # Ensure the update is saved
                 return cursor.rowcount  # Return number of affected rows
         except Exception as e:
+            #revert changes made during the current transaction if this didn't execute well
+            self.conn.rollback()
             logging.error(f"Failed to update score status for {user}: {e}")
             return 0  # Indicate failure)
     
@@ -347,7 +358,36 @@ class DatabaseManager:
                 self.conn.commit()  # Ensure the update is saved
                 return cursor.rowcount  # Return number of affected rows
         except Exception as e:
+            #revert changes made during the current transaction if this didn't execute well
+            self.conn.rollback()
             logging.error(f"Failed to update logged status for {name}: {e}")
+            return 0  # Indicate failure)
+        
+    def add_user(self, user_data: dict):
+        """Insert new user."""
+        user_query = """
+            INSERT INTO users (name) 
+            VALUES (%s)
+            RETURNING user_id;
+        """
+        user_log_query = """
+            INSERT INTO user_log (user_id, username, hashed_password) 
+            VALUES (%s, %s, %s);
+        """
+        try:
+            with self.conn.cursor() as cursor:
+                #insert data into users
+                cursor.execute(user_query, (user_data["name"],))
+                user_id = cursor.fetchone()[0] # Retrieve generated user_id
+
+                # insert data into user_log
+                cursor.execute(user_log_query, (user_id, user_data["username"], user_data["hashed_password"]))
+                self.conn.commit()  # Ensure the update is saved
+                return cursor.rowcount  # Return number of affected rows
+        except Exception as e:
+            #revert changes made during the current transaction if this didn't execute well
+            self.conn.rollback()
+            logging.error(f"Failed to add new user: {e}")
             return 0  # Indicate failure)
     
     ### admin functions ###
@@ -396,6 +436,8 @@ class DatabaseManager:
                 self.conn.commit()  # Ensure the update is saved
                 return cursor.rowcount  # Return number of affected rows
         except Exception as e:
+            #revert changes made during the current transaction if this didn't execute well
+            self.conn.rollback()
             logging.error(f"Failed to insert data into topics: {e}")
             return 0  # Indicate failure)
         
@@ -423,5 +465,7 @@ class DatabaseManager:
                 self.conn.commit()  # Ensure the update is saved
                 return cursor.rowcount  # Return number of affected rows
         except Exception as e:
+            #revert changes made during the current transaction if this didn't execute well
+            self.conn.rollback()
             logging.error(f"Failed to insert data into {category}s: {e}")
             return 0  # Indicate failure)

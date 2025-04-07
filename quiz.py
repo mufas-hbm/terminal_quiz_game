@@ -2,27 +2,65 @@ import random
 from menu import Menu
 from data_input import InputHandler
 from question_manager import QuestionManager
+import time
 
 class Quiz:
     def __init__(self, db_manager,input_handler=None):
         self.db_manager = db_manager
         self.input_handler = input_handler
-        self.db_dict = self.db_manager.create_database_dict()
+        #self.db_dict = self.db_manager.create_database_dict()
 
-    def start(self,user_choice):
-        #Menu.display_topics_menu(self.db_manager)
-        #print(Menu.create_database_dict(self.db_manager))
-        #QuestionManager.take_category_for_questions(self.db_manager)
+    def start(self,user_choice, username):
+        score = 0
+        question_counter = 1
+
+        # Fetch quiz questions from the database based on the chosen category
         questions = self.db_manager.fetch_questions(user_choice)
+        #print(len(questions))
+
+        # Loop through each question retrieved
         for question in questions:
+            print(f"Question number {question_counter}:")
+            question_counter += 1
             print(question)
+
+            # Fetch possible answers associated with the question
             answers = self.db_manager.fetch_answers_from_question(question)
-            for answer in enumerate(answers, start=1):
-                print(f'{answer[0]}: {answer[1]}')
-            answer = int(input("input an answer:"))
-            user_answer = answers[answer-1].strip()
-            check_answer = self.db_manager.check_user_answer(user_answer)
-            print(check_answer)
+
+            # Display the available answer choices with their respective indexes
+            for index, answer_text in enumerate(answers, start=1):
+                print(f'{index}: {answer_text}')
+
+            # Prompt the user to input their answer choice (numeric index). 
+            try:
+                user_answer = int(self.input_handler.quiz_get_user_answer())
+                # if user_answer is None:
+                #     print("\nTime's up! Moving to the next question")
+                #     continue
+            
+                if 1 <= user_answer <= len(answers):
+                    # Extract the user's selected answer
+                    user_answer = answers[user_answer-1].strip()
+                else:
+                    print("Invalid selection. Moving to the next question")
+                
+            
+                #extract column 'right_answer' (bool) from db
+                # Validate the user's answer against the correct answer stored in the database
+                check_answer = self.db_manager.check_user_answer(user_answer)[0]
+                if check_answer is True:
+                    print("\nCorrect! +1 Point\n")
+                    score += 1
+                else:
+                    print("\n False!")
+            # Handle invalid inputs and moving on
+            except (ValueError, TypeError, IndexError):
+                print("Invalid input! Moving to the next question.")
+
+        print(f"\nYour final score: {score}/{len(questions)}")
+        self.db_manager.add_score_to_user(score, username)
+        print("\nYour total score and matches were updated")
+              
 
 
     

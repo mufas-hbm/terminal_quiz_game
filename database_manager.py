@@ -215,6 +215,10 @@ class DatabaseManager:
             query = "SELECT question_text FROM questions JOIN submodules ON submodules.submodule_id=questions.submodule_id WHERE submodule_name=%s;"
         return self.fetch_data(query, (user_choice,))
     
+    def fetch_questions_difficulty_mode(self, difficulty):
+        query = "SELECT question_text FROM questions WHERE submodule_id is NULL AND difficulty=%s;"
+        return self.fetch_data(query, (difficulty,))
+    
     # def fetch_answers_from_question(self, question):
     #     """
     #     Retrieves all possible answers for a given question from the database.
@@ -384,6 +388,10 @@ class DatabaseManager:
                 cursor.execute(user_log_query, (user_id, user_data["username"], user_data["hashed_password"]))
                 self.conn.commit()  # Ensure the update is saved
                 return cursor.rowcount  # Return number of affected rows
+        except psycopg2.errors.UniqueViolation:
+            self.conn.rollback()
+            print(f"Error: Username '{user_data["username"]}' already exists. Please choose a different one.")
+            return 0  # Indicate failure)
         except Exception as e:
             #revert changes made during the current transaction if this didn't execute well
             self.conn.rollback()

@@ -1,32 +1,52 @@
 class Menu:
     @staticmethod
     def display_user_menu():
-        print("\nMain Menu:")
-        print("1. Take a Quiz")
-        print("2. Add a New Question(will be removed after admin implementation)")
-        print("3. Log Out")
-        choice = input("Enter your choice (1-3): ")
+        print("\n" + "="*20)
+        print("      USER MENU      ")
+        print("="*20)
+        print("1️⃣  Take a Quiz")
+        print("2️⃣  Log Out")
+        print("="*20)
+        choice = int(input("👉 Enter your choice (1-2): "))
+        return choice
+    
+    @staticmethod
+    def display_game_modus_menu():
+        print("\n" + "="*20)
+        print("      GAME MODUS      ")
+        print("="*20)
+        print("1️⃣  Topics")
+        print("2️⃣  Difficulty")
+        print("="*20)
+        choice = int(input("👉 Enter your choice (1-2): "))
         return choice
     
     @staticmethod
     def display_main_menu():
-        print("Log Menu:")
-        print("1. Log in")
-        print("2. Register")
-        print("3. Exit")
-        choice = input("Enter your choice (1-3): ")
+        print("\n" + "="*20)
+        print("      LOG MENU      ")
+        print("="*20)
+        print("1️⃣  Log in")
+        print("2️⃣  Register")
+        print("3️⃣  Exit")
+        print("="*20)
+        choice = input("👉 Enter your choice (1-3): ")
         return choice
     
     @staticmethod
     def display_admin_menu():
-        print("Admin Menu:")
-        print("1. Add new question")
-        print("2. Add topic to database")
-        print("3. Add modul to database")
-        print("4. Add submodul to database")
-        print("5. Log out")
-        choice = input("Enter your choice (1-5): ")
+        print("\n" + "="*25)
+        print("      ADMIN MENU      ")
+        print("="*25)
+        print("1️⃣  ➕ Add new question")
+        print("2️⃣  📂 Add topic to database")
+        print("3️⃣  📑 Add module to database")
+        print("4️⃣  📂 Add submodule to database")
+        print("5️⃣  🚪 Log out")
+        print("="*25)
+        choice = input("👉 Enter your choice (1-5): ")
         return choice
+
     
 
 """

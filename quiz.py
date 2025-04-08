@@ -10,12 +10,22 @@ class Quiz:
         self.input_handler = input_handler
         #self.db_dict = self.db_manager.create_database_dict()
 
-    def start(self,user_choice, username):
+    def start(self, questions, username):
         score = 0
         question_counter = 1
 
-        # Fetch quiz questions from the database based on the chosen category
-        questions = self.db_manager.fetch_questions(user_choice)
+        # #choose game mode
+        # game_mode = self.input_handler.get_game_mode()
+
+        # if game_mode == 1:
+
+
+        # Fetch quiz questions from the database based on the chosen category and mode 'topics'
+        #questions = self.db_manager.fetch_questions(user_choice)
+        # if game_mode == 2:
+            # Fetch quiz questions from the database based on game mode 'difficulty'
+        #difficulty = self.input_handler.get_difficulty()
+        #questions = self.db_manager.fetch_questions_difficulty_mode(difficulty)
         #print(len(questions))
 
         # Loop through each question retrieved

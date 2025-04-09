@@ -47,7 +47,7 @@ class SessionManager():
             else:
                 print("Invalid choice. Please try again.")
          
-    def player_session(self,current_user):
+    def player_session(self,current_user, username):
         while True:
             choice:int = Menu.display_user_menu()
 
@@ -75,8 +75,23 @@ class SessionManager():
 
                 #run the quiz
                 self.quiz.start(questions, current_user)
-                                            
+
             elif choice == 2:
+                print("\t📊 User Progress Report 📊")
+                print("=" * 40)
+
+                user_data = self.db_manager.track_user_progress(username)  
+
+                # Extract values
+                total_score, last_score, total_matchs = user_data
+
+                # Print results
+                print(f"🎯 Total Score:   {total_score}")
+                print(f"📈 Last Score:    {last_score}")
+                print(f"🏆 Total Matches: {total_matchs}")
+                print("=" * 40)
+
+            elif choice == 3:
                 print("Loging out")
                 #set the logged status from actual user as False in the db.
                 self.db_manager.set_logged_status(current_user, False)

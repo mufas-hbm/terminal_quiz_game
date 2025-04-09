@@ -5,9 +5,10 @@ class Menu:
         print("      USER MENU      ")
         print("="*20)
         print("1️⃣  Take a Quiz")
-        print("2️⃣  Log Out")
+        print("2️⃣  Track my progress")
+        print("3️⃣  Log Out")
         print("="*20)
-        choice = int(input("👉 Enter your choice (1-2): "))
+        choice = int(input("👉 Enter your choice (1-3): "))
         return choice
     
     @staticmethod

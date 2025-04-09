@@ -330,17 +330,34 @@ class DatabaseManager:
         """
         return self.fetch_data(query, (username, password))
 
+    def track_user_progress(self, username):
+        query = """
+        SELECT total_score, last_score, total_matchs
+        FROM users
+        JOIN user_log ON users.user_id = user_log.user_id
+        WHERE user_log.username = %s;
+        """
+        try:
+            with self.conn.cursor() as cursor:
+                cursor.execute(query, (username,))
+                return cursor.fetchall()[0]
+
+        except Exception as e:
+            self.conn.rollback()  # Rollback any failed transaction
+            logging.error(f"Database query failed for username {username}: {e}")
+            return []
+
     def add_score_to_user(self, score, user):
         query = """
             UPDATE users
             SET total_score = total_score + %s,
                 last_score = %s,
-                total_matchs = total_matchs +1
+                total_matchs = total_matchs + %s
             WHERE name = %s;
         """
         try:
             with self.conn.cursor() as cursor:
-                cursor.execute(query, (score, score, user))
+                cursor.execute(query, (score, score, 1,  user))
                 self.conn.commit()  # Ensure the update is saved
                 return cursor.rowcount  # Return number of affected rows
         except Exception as e:

@@ -35,17 +35,19 @@ class Menu:
         return choice
     
     @staticmethod
-    def display_admin_menu():
+    def display_admin_menu(modification, preposition):
         print("\n" + "="*25)
         print("      ADMIN MENU      ")
         print("="*25)
-        print("1️⃣  ➕ Add new question")
-        print("2️⃣  📂 Add topic to database")
-        print("3️⃣  📑 Add module to database")
-        print("4️⃣  📂 Add submodule to database")
-        print("5️⃣  🚪 Log out")
+        print(f"1️⃣  ➕ {modification} question {preposition} database")
+        print(f"2️⃣  📂 {modification} topic {preposition} database")
+        print(f"3️⃣  📑 {modification} module {preposition} database")
+        print(f"4️⃣  📦 {modification} submodule {preposition} database")
+        print(f"5️⃣  👤 {modification} user {preposition} database")
+        print("6️⃣  ⬅️ Go back")
+        print("7️⃣  🚪 Log out")
         print("="*25)
-        choice = input("👉 Enter your choice (1-5): ")
+        choice = input("👉 Enter your choice (1-6): ")
         return choice
 
     

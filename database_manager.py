@@ -494,3 +494,72 @@ class DatabaseManager:
             self.conn.rollback()
             logging.error(f"Failed to insert data into {category}s: {e}")
             return 0  # Indicate failure)
+    
+    def remove_user(self, username):
+        query = f"""
+            DELETE FROM users
+            WHERE user_id IN (
+                SELECT users.user_id
+                FROM users 
+                JOIN user_log ON users.user_id = user_log.user_id
+                WHERE user_log.username = %s
+            );
+        """
+        try:
+            with self.conn.cursor() as cursor:
+                cursor.execute(query, (username,))
+                self.conn.commit()  # Ensure the update is saved
+                return cursor.rowcount  # Return number of affected rows
+        except Exception as e:
+            #revert changes made during the current transaction if this didn't execute well
+            self.conn.rollback()
+            logging.error(f"Failed to remove user {username}: {e}")
+            return -1  # Indicate failure)
+        
+    def remove_submodule(self, submodule_name):
+        query = f"""
+            DELETE FROM submodules
+            WHERE submodule_name = %s;
+        """
+        try:
+            with self.conn.cursor() as cursor:
+                cursor.execute(query, (submodule_name,))
+                self.conn.commit()  # Ensure the update is saved
+                return cursor.rowcount  # Return number of affected rows
+        except Exception as e:
+            #revert changes made during the current transaction if this didn't execute well
+            self.conn.rollback()
+            logging.error(f"Failed to remove submodule {submodule_name}: {e}")
+            return -1  # Indicate failure)
+    
+    def remove_module(self, module_name):
+        query = f"""
+            DELETE FROM modules
+            WHERE module_name = %s;
+        """
+        try:
+            with self.conn.cursor() as cursor:
+                cursor.execute(query, (module_name,))
+                self.conn.commit()  # Ensure the update is saved
+                return cursor.rowcount  # Return number of affected rows
+        except Exception as e:
+            #revert changes made during the current transaction if this didn't execute well
+            self.conn.rollback()
+            logging.error(f"Failed to remove module {module_name}: {e}")
+            return -1  # Indicate failure)
+    
+    def remove_topic(self, topic_name):
+        query = f"""
+            DELETE FROM topics
+            WHERE topic_name = %s;
+        """
+        try:
+            with self.conn.cursor() as cursor:
+                cursor.execute(query, (topic_name,))
+                self.conn.commit()  # Ensure the update is saved
+                return cursor.rowcount  # Return number of affected rows
+        except Exception as e:
+            #revert changes made during the current transaction if this didn't execute well
+            self.conn.rollback()
+            logging.error(f"Failed to remove topic {topic_name}: {e}")
+            return -1  # Indicate failure)

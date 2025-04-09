@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS modules (
     CONSTRAINT fk_module_topic
         FOREIGN KEY (topic_id) 
         REFERENCES topics(topic_id)
+        ON DELETE CASCADE
 );
 -- create table submodule
 CREATE TABLE IF NOT EXISTS submodules (
@@ -32,6 +33,7 @@ CREATE TABLE IF NOT EXISTS submodules (
     CONSTRAINT fk_submodule_module
         FOREIGN KEY (module_id) 
         REFERENCES modules(module_id)
+        ON DELETE CASCADE
 );
 
 -- create type ENUM for the question difficulty
@@ -49,6 +51,7 @@ CREATE TABLE IF NOT EXISTS questions(
     CONSTRAINT fk_questions_submmodule
         FOREIGN KEY (submodule_id)
         REFERENCES submodules(submodule_id)
+        ON DELETE CASCADE
 );
 
 -- create table answers
@@ -61,6 +64,7 @@ CREATE TABLE IF NOT EXISTS answers(
     CONSTRAINT fk_questions_answers
         FOREIGN KEY (question_id)
         REFERENCES questions(question_id)
+        ON DELETE CASCADE
 
 );
 
@@ -95,112 +99,6 @@ INSERT INTO users (name) VALUES
 INSERT INTO user_log (user_id,username, hashed_password) VALUES 
 (1, 'admin', 'admin'),
 (2, 'hector', 'hbassas');
-
--- -- Insert values into topics table
--- INSERT INTO topics (topic_name, topic_description) VALUES
--- ('Programming', 'All things programming'),
--- ('Mathematics', 'Mathematical concepts'),
--- ('History', 'Historical events and figures');
-
--- -- Insert values into modules table
--- INSERT INTO modules (topic_id, module_name, module_description) VALUES
--- (1, 'Python Basics', 'Fundamental Python concepts'),
--- (1, 'Data Structures', 'Common data structures'),
--- (2, 'Algebra', 'Algebraic equations and expressions'),
--- (2, 'Calculus', 'Differential and integral calculus'),
--- (3, 'World War II', 'Events of WWII'),
--- (3, 'Ancient Egypt', 'History of Ancient Egypt'),
--- (3, 'Art History', 'History of visual arts');
-
--- -- Insert values into submodules table
--- INSERT INTO submodules (module_id, submodule_name, submodule_description) VALUES
--- (1, 'Variables', 'Variable declaration and usage'),
--- (1, 'Loops', 'For and while loops'),
--- (2, 'Linked Lists', 'Singly and doubly linked lists'),
--- (2, 'Trees', 'Binary trees and traversals'),
--- (3, 'Linear Equations', 'Solving linear equations'),
--- (4, 'Derivatives', 'Calculating derivatives'),
--- (5, 'Battle of Britain', 'The aerial campaign'),
--- (6, 'Pharaohs', 'Rulers of Ancient Egypt');
-
--- -- Insert values into questions table
--- INSERT INTO questions (submodule_id, question_text, difficulty, explanation, hint) VALUES
--- (1, 'What is the correct way to declare a variable in Python?', 'easy', 'In Python, variables are declared dynamically using the assignment operator (=). You simply assign a value to a name, and Python infers the variable type. For example, `my_variable = 10` declares an integer variable. Unlike statically typed languages, you don\´t need to specify the data type explicitly.', 'Think about the assignment operator.'),
--- (2, 'What is the purpose of a for loop?', 'medium', 'A for loop in programming is used to iterate over a sequence (such as a list, tuple, string, or range) and execute a block of code for each element in the sequence. It simplifies repetitive tasks and is essential for working with collections of data.', 'Consider how you would repeat an action for each item in a list.'),
--- (3, 'What is a linked list?', 'medium', 'A linked list is a linear data structure where elements are not stored in contiguous memory locations. Each element, called a node, contains data and a pointer (or link) to the next node in the sequence. This structure allows for efficient insertion and deletion of elements but requires sequential access.', 'Think of a chain of connected items.'),
--- (4, 'What is a binary tree?', 'hard', 'A binary tree is a hierarchical data structure where each node has at most two children, referred to as the left child and the right child. Binary trees are used to represent hierarchical relationships, implement efficient searching and sorting algorithms, and store data in a structured manner.', 'Imagine a tree-like structure with a maximum of two branches per node.'),
--- (5, 'Solve for x: 2x + 5 = 11', 'easy', 'To solve for x, you first subtract 5 from both sides of the equation, resulting in 2x = 6. Then, you divide both sides by 2 to isolate x, giving you x = 3. This is a basic algebraic equation solved using inverse operations.', 'First, isolate the term with x.'),
--- (6, 'What is the derivative of x^2?', 'hard', 'The derivative of x^2 is 2x. In calculus, the derivative represents the instantaneous rate of change of a function. Applying the power rule of differentiation (d/dx(x^n) = nx^(n-1)), the derivative of x^2 is 2 * x^(2-1) = 2x.', 'Use the power rule of differentiation.'),
--- (7, 'What was the Battle of Britain?', 'medium', 'The Battle of Britain was a crucial aerial campaign during World War II, fought between the Royal Air Force (RAF) and the German Luftwaffe. The battle took place over Britain from July to October 1940 and was a decisive victory for the RAF, preventing a German invasion.', 'It was an air battle during World War II.'),
--- (8, 'Who was Hatshepsut?', 'medium', 'Hatshepsut was one of the most powerful female pharaohs of ancient Egypt, ruling during the 18th Dynasty. She is known for her ambitious building projects, including the magnificent mortuary temple at Deir el-Bahri, and her successful trade expeditions. She ruled for approximately 20 years, a very long time for a female Pharoah.', 'She was a female ruler in ancient Egypt.'),
--- (8, 'Who was Ramses II?', 'medium', 'Ramses II, also known as Ramses the Great, was one of ancient Egypt’s most powerful and influential pharaohs. He ruled for over 60 years during the 19th Dynasty and is known for his extensive building projects, military campaigns, and the signing of the first known peace treaty.', 'He was a great warrior and builder.'),
--- (8, 'What was the purpose of the pyramids?', 'easy', 'The pyramids of ancient Egypt were built as tombs for pharaohs and high-ranking officials. They served as grand monuments to ensure a safe passage to the afterlife, reflecting Egyptian beliefs in immortality and resurrection.', 'They were tombs for pharaohs.'),
--- (8, 'What is the Rosetta Stone and why is it important?', 'hard', 'The Rosetta Stone is an ancient Egyptian artifact that was instrumental in deciphering Egyptian hieroglyphs. It contains inscriptions in three scripts: Greek, Demotic, and hieroglyphic. Its discovery allowed scholars to unlock the secrets of ancient Egyptian writing.', 'It helped scholars read hieroglyphs.'),
--- (8, 'What role did the Nile River play in ancient Egypt?', 'medium', 'The Nile River was the lifeblood of ancient Egypt, providing water, transportation, and fertile land for agriculture. Its annual floods enriched the soil, making farming possible, and it served as a major trade and communication route.', 'It was essential for farming and trade.'),
--- (8, 'What was the Book of the Dead?', 'hard', 'The Book of the Dead was an ancient Egyptian funerary text containing spells, prayers, and instructions to guide the deceased through the afterlife. It was often placed in tombs to ensure a safe journey and a favorable outcome in the afterlife.', 'It contained spells for the afterlife.'),
--- (NULL, 'What is the capital of France?', 'easy', 'Paris is the capital of France. It is a major global city, known for its rich history, culture, architecture, and gastronomy. Located on the Seine River, it is a center of politics, fashion, and art.', 'Think of the city on the Seine River.'),
--- (NULL, 'Which planet is known as the "Red Planet"?', 'easy', 'Mars is known as the "Red Planet" due to its reddish appearance caused by iron oxide (rust) on its surface. It is the fourth planet from the Sun and has a thin atmosphere.', 'Consider the planet with a rusty surface.');
-
--- -- Insert values into answers table
--- INSERT INTO answers (question_id, answer, right_answer) VALUES
--- (1, 'x = 5', TRUE),
--- (1, 'var x = 5', FALSE),
--- (1, 'int x = 5', FALSE),
--- (2, 'To iterate over a sequence', TRUE),
--- (2, 'To define a class', FALSE),
--- (2, 'To print a message', FALSE),
--- (3, 'A linear data structure', TRUE),
--- (3, 'A non-linear data structure', FALSE),
--- (4, 'A tree data structure', TRUE),
--- (4, 'A graph data structure', FALSE),
--- (5, 'x = 3', TRUE),
--- (5, 'x = 4', FALSE),
--- (6, '2x', TRUE),
--- (6, 'x', FALSE),
--- (7, 'An aerial campaign', TRUE),
--- (7, 'A land battle', FALSE),
--- (8, 'A female pharaoh', TRUE),
--- (8, 'A male pharaoh', FALSE),
-
--- (9, 'Ramses II was a powerful warrior and builder.', TRUE),
--- (9, 'Ramses II was a pharaoh during the Old Kingdom.', FALSE),
--- (9, 'Ramses II is known for signing the first peace treaty.', TRUE),
--- (9, 'Ramses II ruled for only a few years.', FALSE),
--- (9, 'Ramses II built the Great Pyramid of Giza.', FALSE),
-
--- (10, 'The pyramids were tombs for pharaohs.', TRUE),
--- (10, 'The pyramids were used for storing food.', FALSE),
--- (10, 'The pyramids were temples for the gods.', FALSE),
--- (10, 'The pyramids ensured passage to the afterlife.', TRUE),
--- (10, 'The pyramids were built as military fortifications.', FALSE),
-
--- (11, 'The Rosetta Stone helped decipher Egyptian hieroglyphs.', TRUE),
--- (11, 'The Rosetta Stone is a large gemstone.', FALSE),
--- (11, 'The Rosetta Stone contains inscriptions in three scripts.', TRUE),
--- (11, 'The Rosetta Stone was created during the reign of Ramses II.', FALSE),
--- (11, 'The Rosetta Stone was discovered in the 18th Dynasty.', FALSE),
-
--- (12, 'The Nile River was essential for farming.', TRUE),
--- (12, 'The Nile River was a major trade route.', TRUE),
--- (12, 'The Nile River made farming difficult in Egypt.', FALSE),
--- (12, 'The Nile River was never used for transportation.', FALSE),
--- (12, 'The Nile River provided fertile soil.', TRUE),
-
--- (13, 'The Book of the Dead contained spells for the afterlife.', TRUE),
--- (13, 'The Book of the Dead was a collection of laws.', FALSE),
--- (13, 'The Book of the Dead was placed in tombs.', TRUE),
--- (13, 'The Book of the Dead was written by one author.', FALSE),
--- (13, 'The Book of the Dead was used by priests in religious ceremonies.', TRUE),
-
-
--- (14, 'Barcelona', FALSE),
--- (14, 'Milan', FALSE),
--- (14, 'Paris', TRUE),
--- (14, 'Egypt', False),
--- (15, 'Earth', False),
--- (15, 'Mars', TRUE),
--- (15, 'Jupiter', FALSE),
--- (15, 'Saturn', FALSE);
 
 -- Insert values into topics table
 INSERT INTO topics (topic_name, topic_description) VALUES
@@ -3159,7 +3057,7 @@ INSERT INTO answers (question_id, answer, right_answer) VALUES
 
 
 
--- General Knowledge Questions (no submodule_id)
+-- General Knowledge easy questions (no submodule_id)
 INSERT INTO questions (question_text, difficulty, explanation, hint) VALUES
 ('What is the capital city of Australia?', 'easy', 'Canberra is the capital, located in the Australian Capital Territory.', 'Think about the planned city that is the seat of government.'),
 ('Who painted the Mona Lisa?', 'easy', 'Leonardo da Vinci painted the Mona Lisa.', 'Consider a famous Renaissance artist.'),
@@ -3221,3 +3119,209 @@ INSERT INTO answers (question_id, answer, right_answer) VALUES
 (275, 'Yen', TRUE),
 (275, 'Baht', FALSE),
 (275, 'Rupee', FALSE);
+
+-- General Knowledge medium questions (no submodule_id)
+INSERT INTO questions (question_text, difficulty, explanation, hint) VALUES
+('What is the largest planet in our solar system?', 'medium', 'Jupiter is the largest planet, known for its Great Red Spot.', 'Think about the gas giant with a famous storm.'),
+('Who wrote the play "Hamlet"?', 'medium', 'William Shakespeare wrote the play "Hamlet".', 'Consider a renowned English playwright.'),
+('What is the chemical formula for glucose?', 'medium', 'The chemical formula for glucose is C₆H₁₂O₆.', 'Think about a simple sugar crucial for energy.'),
+('What is the deepest ocean trench in the world?', 'medium', 'The Mariana Trench is the deepest ocean trench.', 'Consider the trench located in the western Pacific Ocean.'),
+('In what year did the Titanic sink?', 'medium', 'The Titanic sank in 1912.', 'Think about the early 20th century maritime disaster.'),
+('What is the main component of Earths atmosphere?', 'medium', 'Nitrogen is the main component of Earths atmosphere.', 'Consider the gas that makes up the majority of the air we breathe.'),
+('What is the speed of light in a vacuum?', 'medium', 'The speed of light in a vacuum is approximately 299,792,458 meters per second.', 'Think about the universal speed limit.'),
+('Who developed the theory of relativity?', 'medium', 'Albert Einstein developed the theory of relativity.', 'Consider a famous physicist known for E=mc².'),
+('What is the largest desert in the world?', 'medium', 'The Antarctic Desert is the largest desert in the world.', 'Think about a cold, dry expanse.'),
+('What is the chemical symbol for gold?', 'medium', 'The chemical symbol for gold is Au.', 'Consider the Latin word for gold, "aurum".');
+
+
+-- Answers for 'What is the largest planet in our solar system?' (assuming question_id starts at 276)
+INSERT INTO answers (question_id, answer, right_answer) VALUES
+(276, 'Saturn', FALSE),
+(276, 'Uranus', FALSE),
+(276, 'Neptune', FALSE),
+(276, 'Jupiter', TRUE),
+(276, 'Mars', FALSE),
+(276, 'Earth', FALSE);
+
+-- Answers for 'Who wrote the play "Hamlet"?' (assuming question_id = 277)
+INSERT INTO answers (question_id, answer, right_answer) VALUES
+(277, 'Christopher Marlowe', FALSE),
+(277, 'Ben Jonson', FALSE),
+(277, 'George Bernard Shaw', FALSE),
+(277, 'William Shakespeare', TRUE),
+(277, 'Oscar Wilde', FALSE),
+(277, 'Arthur Miller', FALSE);
+
+-- Answers for 'What is the chemical formula for glucose?' (assuming question_id = 278)
+INSERT INTO answers (question_id, answer, right_answer) VALUES
+(278, 'H₂O', FALSE),
+(278, 'NaCl', FALSE),
+(278, 'CO₂', FALSE),
+(278, 'C₆H₁₂O₆', TRUE),
+(278, 'O₂', FALSE),
+(278, 'CH₄', FALSE);
+
+-- Answers for 'What is the deepest ocean trench in the world?' (assuming question_id = 279)
+INSERT INTO answers (question_id, answer, right_answer) VALUES
+(279, 'Puerto Rico Trench', FALSE),
+(279, 'Java Trench', FALSE),
+(279, 'Aleutian Trench', FALSE),
+(279, 'Mariana Trench', TRUE),
+(279, 'South Sandwich Trench', FALSE),
+(279, 'Kurile-Kamchatka Trench', FALSE);
+
+-- Answers for 'In what year did the Titanic sink?' (assuming question_id = 280)
+INSERT INTO answers (question_id, answer, right_answer) VALUES
+(280, '1907', FALSE),
+(280, '1910', FALSE),
+(280, '1911', FALSE),
+(280, '1912', TRUE),
+(280, '1915', FALSE),
+(280, '1920', FALSE);
+
+-- Answers for 'What is the main component of Earth\'s atmosphere?' (assuming question_id = 281)
+INSERT INTO answers (question_id, answer, right_answer) VALUES
+(281, 'Oxygen', FALSE),
+(281, 'Carbon Dioxide', FALSE),
+(281, 'Argon', FALSE),
+(281, 'Nitrogen', TRUE),
+(281, 'Hydrogen', FALSE),
+(281, 'Helium', FALSE);
+
+INSERT INTO answers (question_id, answer, right_answer) VALUES
+(282, '300,000 km/s', TRUE),  -- Approximate value often used
+(282, '150,000 km/s', FALSE),
+(282, '500,000 km/s', FALSE),
+(282, '299,792,458 m/s', TRUE), -- More precise value
+(282, '1,000,000 km/s', FALSE),
+(282, '200,000,000 m/s', FALSE);
+
+-- Answers for 'Who developed the theory of relativity?' (assuming question_id = 283)
+INSERT INTO answers (question_id, answer, right_answer) VALUES
+(283, 'Isaac Newton', FALSE),
+(283, 'Galileo Galilei', FALSE),
+(283, 'Stephen Hawking', FALSE),
+(283, 'Albert Einstein', TRUE),
+(283, 'Niels Bohr', FALSE),
+(283, 'Max Planck', FALSE);
+
+-- Answers for 'What is the largest desert in the world?' (assuming question_id = 284)
+INSERT INTO answers (question_id, answer, right_answer) VALUES
+(284, 'Sahara Desert', FALSE),
+(284, 'Arabian Desert', FALSE),
+(284, 'Gobi Desert', FALSE),
+(284, 'Antarctic Desert', TRUE),
+(284, 'Australian Desert', FALSE),
+(284, 'Kalahari Desert', FALSE);
+
+-- Answers for 'What is the chemical symbol for gold?' (assuming question_id = 285)
+INSERT INTO answers (question_id, answer, right_answer) VALUES
+(285, 'Gd', FALSE),
+(285, 'Gl', FALSE),
+(285, 'Go', FALSE),
+(285, 'Au', TRUE),
+(285, 'Ag', FALSE),
+(285, 'Fe', FALSE);
+
+-- General Knowledge hard questions (no submodule_id)
+INSERT INTO questions (question_text, difficulty, explanation, hint) VALUES
+('What is the name of the international agreement that committed industrialized nations to limiting and reducing greenhouse gas emissions, but which the United States withdrew from in 2020?', 'hard', 'The Paris Agreement is an international treaty on climate change, adopted in 2015.', 'Think about a recent global effort to combat climate change.'),
+('What is the philosophical problem of induction, famously articulated by David Hume?', 'hard', 'The problem of induction questions whether inductive reasoning leads to knowledge understood in the classic philosophical sense, highlighting that the future might not resemble the past.', 'Consider the limits of drawing general conclusions from specific observations.'),
+('What is the name of the phenomenon where a spinning gyroscope or other rotating object precesses about a vertical axis when subjected to a torque?', 'hard', 'Precession is the change in the orientation of the rotational axis of a rotating body.', 'Think about the slow wobble of a spinning top.'),
+('What is the approximate age of the universe according to the Lambda-CDM model?', 'hard', 'The Lambda-CDM model estimates the age of the universe to be approximately 13.8 billion years.', 'Consider the standard model of cosmology.'),
+('What is the name of the theorem in mathematical logic that demonstrates that any sufficiently expressive formal system of arithmetic cannot prove all true statements about the natural numbers?', 'hard', 'Gödels incompleteness theorems are two theorems of mathematical logic that establish inherent limitations of all but the most trivial axiomatic systems capable of modeling basic arithmetic.', 'Think about the limits of formal proof in mathematics.'),
+('What is the name of the economic concept describing a situation where the marginal benefit of producing one more unit of a good or service is equal to the marginal cost?', 'hard', 'Marginal cost equals marginal revenue is the condition for profit maximization in perfect competition and is related to allocative efficiency.', 'Consider the point of optimal production in economics.'),
+('What is the name of the geological epoch that began after the Pleistocene and is characterized by human impact on the environment?', 'hard', 'The Holocene epoch is the current geological epoch.', 'Think about the most recent period in Earths history since the last major ice age.'),
+('What is the name of the neurotransmitter that plays a key role in the brains reward system and is often associated with feelings of pleasure and motivation?', 'hard', 'Dopamine is a neurotransmitter that plays several important roles in the brain and body.', 'Consider a chemical messenger linked to reward and pleasure.'),
+('What is the name of the literary device where a part of something is used to refer to the whole, or vice versa?', 'hard', 'Synecdoche is a figure of speech in which a part is made to represent the whole or vice versa.', 'Think about using "wheels" to refer to a car.'),
+('What is the name of the principle in quantum mechanics that states that certain pairs of physical properties, such as position and momentum, cannot both be known to arbitrarily high precision?', 'hard', 'The Heisenberg uncertainty principle is a fundamental concept in quantum mechanics.', 'Consider the inherent limitations in measuring certain pairs of quantum properties simultaneously.');
+
+-- Answers for 'What is the name of the international agreement that committed industrialized nations to limiting and reducing greenhouse gas emissions, but which the United States withdrew from in 2020?' (assuming question_id starts at 286)
+INSERT INTO answers (question_id, answer, right_answer) VALUES
+(286, 'Kyoto Protocol', FALSE),
+(286, 'Montreal Protocol', FALSE),
+(286, 'Copenhagen Accord', FALSE),
+(286, 'Paris Agreement', TRUE),
+(286, 'Rio Declaration', FALSE),
+(286, 'Bonn Challenge', FALSE);
+
+-- Answers for 'What is the philosophical problem of induction, famously articulated by David Hume?' (assuming question_id = 287)
+INSERT INTO answers (question_id, answer, right_answer) VALUES
+(287, 'The Gettier Problem', FALSE),
+(287, 'The Problem of Evil', FALSE),
+(287, 'The Sorites Paradox', FALSE),
+(287, 'The Problem of Induction', TRUE),
+(287, 'The Mind-Body Problem', FALSE),
+(287, 'The Ship of Theseus', FALSE);
+
+-- Answers for 'What is the name of the phenomenon where a spinning gyroscope or other rotating object precesses about a vertical axis when subjected to a torque?' (assuming question_id = 288)
+INSERT INTO answers (question_id, answer, right_answer) VALUES
+(288, 'Nutation', FALSE),
+(288, 'Inertia', FALSE),
+(288, 'Centrifugation', FALSE),
+(288, 'Precession', TRUE),
+(288, 'Angular Momentum', FALSE),
+(288, 'Torque', FALSE);
+
+-- Answers for 'What is the approximate age of the universe according to the Lambda-CDM model?' (assuming question_id = 289)
+INSERT INTO answers (question_id, answer, right_answer) VALUES
+(289, '4.5 billion years', FALSE),
+(289, '10 billion years', FALSE),
+(289, '15 billion years', FALSE),
+(289, '13.8 billion years', TRUE),
+(289, '20 billion years', FALSE),
+(289, '8 billion years', FALSE);
+
+-- Answers for 'What is the name of the theorem in mathematical logic that demonstrates that any sufficiently expressive formal system of arithmetic cannot prove all true statements about the natural numbers?' (assuming question_id = 290)
+INSERT INTO answers (question_id, answer, right_answer) VALUES
+(290, 'Zermelo-Fraenkel axioms', FALSE),
+(290, 'Peano axioms', FALSE),
+(290, 'Russells paradox', FALSE),
+(290, 'Gödels incompleteness theorems', TRUE),
+(290, 'Cantors diagonal argument', FALSE),
+(290, 'Turing completeness', FALSE);
+
+-- Answers for 'What is the name of the economic concept describing a situation where the marginal benefit of producing one more unit of a good or service is equal to the marginal cost?' (assuming question_id = 291)
+INSERT INTO answers (question_id, answer, right_answer) VALUES
+(291, 'Pareto efficiency', FALSE),
+(291, 'Comparative advantage', FALSE),
+(291, 'Economies of scale', FALSE),
+(291, 'Marginal cost equals marginal benefit', TRUE),
+(291, 'Law of diminishing returns', FALSE),
+(291, 'Supply-side economics', FALSE);
+
+-- Answers for 'What is the name of the geological epoch that began after the Pleistocene and is characterized by human impact on the environment?' (assuming question_id = 292)
+INSERT INTO answers (question_id, answer, right_answer) VALUES
+(292, 'Miocene', FALSE),
+(292, 'Pliocene', FALSE),
+(292, 'Pleistocene', FALSE),
+(292, 'Holocene', TRUE),
+(292, 'Anthropocene', FALSE), -- Anthropocene is debated as a formal epoch
+(292, 'Eocene', FALSE);
+
+-- Answers for 'What is the name of the neurotransmitter that plays a key role in the brain\'s reward system and is often associated with feelings of pleasure and motivation?' (assuming question_id = 293)
+INSERT INTO answers (question_id, answer, right_answer) VALUES
+(293, 'Serotonin', FALSE),
+(293, 'Norepinephrine', FALSE),
+(293, 'GABA', FALSE),
+(293, 'Dopamine', TRUE),
+(293, 'Acetylcholine', FALSE),
+(293, 'Glutamate', FALSE);
+
+-- Answers for 'What is the name of the literary device where a part of something is used to refer to the whole, or vice versa?' (assuming question_id = 294)
+INSERT INTO answers (question_id, answer, right_answer) VALUES
+(294, 'Metaphor', FALSE),
+(294, 'Simile', FALSE),
+(294, 'Personification', FALSE),
+(294, 'Synecdoche', TRUE),
+(294, 'Metonymy', FALSE),
+(294, 'Hyperbole', FALSE);
+
+-- Answers for 'What is the name of the principle in quantum mechanics that states that certain pairs of physical properties, such as position and momentum, cannot both be known to arbitrarily high precision?' (assuming question_id = 295)
+INSERT INTO answers (question_id, answer, right_answer) VALUES
+(295, 'Pauli exclusion principle', FALSE),
+(295, 'Superposition principle', FALSE),
+(295, 'Quantum entanglement', FALSE),
+(295, 'Heisenberg uncertainty principle', TRUE),
+(295, 'Bohr model', FALSE),
+(295, 'Schrödinger equation', FALSE);

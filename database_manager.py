@@ -247,10 +247,27 @@ class DatabaseManager:
         return self.fetch_data(query, (user_id,))
     
     def log_user(self, username, password):
+        """
+        Authenticate a user by verifying their username and password.
+
+        This function checks the `user_log` table to validate the provided 
+        username and password. The password is hashed using the same salt
+        as the stored `hashed_password` using the `crypt()` function 
+        for secure comparison.
+
+        Parameters:
+            username (str): The username provided by the user during login.
+            password (str): The plain-text password provided by the user during login.
+
+        Returns:
+            tuple: The result of the query, typically containing the user_id 
+                if the username and password are correct. Returns an empty 
+                result if authentication fails.
+        """
         query = """
         SELECT user_id 
         FROM user_log
-        WHERE username=%s AND hashed_password=%s;
+        WHERE username=%s AND hashed_password = crypt(%s, hashed_password);
         """
         return self.fetch_data(query, (username, password))
 
@@ -309,7 +326,32 @@ class DatabaseManager:
             return 0  # Indicate failure)
         
     def add_user(self, user_data: dict):
-        """Insert new user."""
+        """
+        Insert a new user into the database.
+
+        This function adds a new user to the `users` table and logs their 
+        authentication details in the `user_log` table. It uses transactions 
+        to ensure that either both operations succeed or both are rolled back 
+        in case of failure, maintaining data consistency.
+
+        Parameters:
+            user_data (dict): A dictionary containing user details:
+                - name (str): The name of the user to be added.
+                - username (str): The username for authentication.
+                - hashed_password (str): The hashed password for secure storage.
+
+        Returns:
+            int: The number of rows affected in the database (should be 1 for successful insertion).
+                Returns 0 if the insertion fails due to a duplicate username or another error.
+
+        Exceptions:
+            psycopg2.errors.UniqueViolation: Raised if the username already exists in the database.
+            Exception: Any other error encountered during database operations.
+
+        Notes:
+            - The `user_log` table requires the `pgcrypto` extension for hashing passwords using `crypt()`.
+            - Rolls back the transaction if any error occurs.
+        """
         user_query = """
             INSERT INTO users (name) 
             VALUES (%s)
@@ -317,7 +359,7 @@ class DatabaseManager:
         """
         user_log_query = """
             INSERT INTO user_log (user_id, username, hashed_password) 
-            VALUES (%s, %s, %s);
+            VALUES (%s, %s, crypt(%s, gen_salt('bf')));
         """
         try:
             with self.conn.cursor() as cursor:

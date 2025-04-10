@@ -78,6 +78,9 @@ CREATE TABLE IF NOT EXISTS users(
     logged BOOLEAN
 );
 
+-- enables the cryptographic functions in your PostgreSQL database.
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 -- create table user_log
 CREATE TABLE IF NOT EXISTS user_log(
     user_id INT UNIQUE NOT NULL,
@@ -97,8 +100,8 @@ INSERT INTO users (name) VALUES
 
 -- Insert values into user_log table
 INSERT INTO user_log (user_id,username, hashed_password) VALUES 
-(1, 'admin', 'admin'),
-(2, 'hector', 'hbassas');
+(1, 'admin', crypt('admin', gen_salt('bf'))),
+(2, 'hector', crypt('hbassas', gen_salt('bf')));
 
 -- Insert values into topics table
 INSERT INTO topics (topic_name, topic_description) VALUES

@@ -8,34 +8,23 @@ class Quiz:
     def __init__(self, db_manager,input_handler=None):
         self.db_manager = db_manager
         self.input_handler = input_handler
-        #self.db_dict = self.db_manager.create_database_dict()
 
     def start(self, questions, username):
         score = 0
         question_counter = 1
-
-        # #choose game mode
-        # game_mode = self.input_handler.get_game_mode()
-
-        # if game_mode == 1:
-
-
-        # Fetch quiz questions from the database based on the chosen category and mode 'topics'
-        #questions = self.db_manager.fetch_questions(user_choice)
-        # if game_mode == 2:
-            # Fetch quiz questions from the database based on game mode 'difficulty'
-        #difficulty = self.input_handler.get_difficulty()
-        #questions = self.db_manager.fetch_questions_difficulty_mode(difficulty)
-        #print(len(questions))
+        
+        #define max questions for each play
+        max_questions = 5
 
         # Loop through each question retrieved
-        for question in questions:
+        for question in questions[:max_questions]:
             print(f"Question number {question_counter}:")
             question_counter += 1
             print(question)
 
-            # Fetch possible answers associated with the question
+            # Fetch possible answers associated with the question in random order
             answers = self.db_manager.fetch_answers_from_question(question)
+            random.shuffle(answers)
 
             # Display the available answer choices with their respective indexes
             for index, answer_text in enumerate(answers, start=1):
@@ -52,9 +41,8 @@ class Quiz:
                     # Extract the user's selected answer
                     user_answer = answers[user_answer-1].strip()
                 else:
-                    print("Invalid selection. Moving to the next question")
+                    continue
                 
-            
                 #extract column 'right_answer' (bool) from db
                 # Validate the user's answer against the correct answer stored in the database
                 check_answer = self.db_manager.check_user_answer(user_answer)[0]
@@ -62,12 +50,18 @@ class Quiz:
                     print("\nCorrect! +1 Point\n")
                     score += 1
                 else:
-                    print("\n False!")
+                    print("\n False!\n")
+
+                    #shows answer explanation to user
+                    question_explanation = self.db_manager.get_question_explanation(question)[0] 
+                    print(f"\t**{question_explanation}**\n")
+
             # Handle invalid inputs and moving on
             except (ValueError, TypeError, IndexError):
                 print("Invalid input! Moving to the next question.")
 
-        print(f"\nYour final score: {score}/{len(questions)}")
+        # shows final score and add the data into the db
+        print(f"\nYour final score: {score}/{max_questions}")
         self.db_manager.add_score_to_user(score, username)
         print("\nYour total score and matches were updated")
               
@@ -197,40 +191,3 @@ class Quiz:
     #     except Exception as e:
     #         print("Error during preparation:", e)
     #         return None
-
-
-
-
-
-
-
-
-
-        # questions = self.fetch_questions(topic)
-
-        # if not questions:
-        #     print("No questions available for this topic.")
-        #     return
-
-        # score = 0
-        # for idx, (question, correct_answer, wrong_answers) in enumerate(questions, 1):
-        #     print(f"\nQuestion {idx}: {question}")
-
-        #     # Shuffle and display options
-        #     options = [correct_answer] + wrong_answers
-        #     random.shuffle(options)
-        #     for i, option in enumerate(options, 1):
-        #         print(f"{i}. {option}")
-
-        #     # Get user input and check answer
-        #     try:
-        #         user_answer = int(input("Your answer (1-4): "))
-        #         if options[user_answer - 1] == correct_answer:
-        #             print("Correct!")
-        #             score += 1
-        #         else:
-        #             print(f"Wrong! The correct answer was: {correct_answer}")
-        #     except ValueError:
-        #         print("Invalid input! Moving to the next question.")
-
-        # print(f"\nYour final score: {score}/{len(questions)}")

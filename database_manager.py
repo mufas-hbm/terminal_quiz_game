@@ -112,102 +112,8 @@ class DatabaseManager:
                     ON modules.module_id = submodules.module_id 
                     WHERE module_name = %s;
         """
-        return self.fetch_data(query, (module,))
-
-    # def fetch_submodules_from_module(self, module=None):
-    #     """
-    #     Fetches a list of submodule names from the 'submodules' table in the database.
-
-    #     This method establishes a database connection, executes a query to retrieve
-    #     all submodule names, and returns the results as a list. In case of an error
-    #     (e.g., connection failure or query issue), it catches the exception and returns
-    #     an empty list.
-
-    #     Returns:
-    #         list: A list of submodule names fetched from the database. Returns an 
-    #             empty list if an error occurs during database interaction.
-    #     """
-    #     try:
-    #         with self.conn.cursor() as cursor:  # Automatically closes the cursor after the queries
-    #             query = """
-    #                 SELECT submodule_name
-    #                 FROM submodules 
-    #                 JOIN modules 
-    #                 ON modules.module_id = submodules.module_id 
-    #                 WHERE module_name = %s;
-    #             """
-    #             cursor.execute(query, (module,))  # Add a trailing comma to make it a tuple
-    #             submodules = [row[0] for row in cursor.fetchall()]  # Fetch all rows and extract submodule names
-    #         return submodules
-    #     except Exception as e:
-    #         print("Error fetching submodules:", e)
-    #         return []  # Return an empty list in case of error
-
-    
-    # def fetch_modules(self, topic):
-    #     """
-    #     Fetches a list of module names from the modules' table in the database.
-
-    #     Args:
-    #         topic (str): The name of the topic to fetch modules for.
-
-    #     Returns:
-    #         list: A list of module names fetched from the database.
-    #             Returns an empty list if an error occurs during database interaction.
-    #     """
-    #     try:
-    #         with self.conn.cursor() as cursor:
-    #             query = """
-    #                 SELECT module_name 
-    #                 FROM modules 
-    #                 JOIN topics ON modules.topic_id = topics.topic_id 
-    #                 WHERE topics.topic_name = %s;
-    #             """
-    #             cursor.execute(query, (topic,))  # Pass arguments as a tuple
-    #             modules = [row[0] for row in cursor.fetchall()]
-    #         return modules
-    #     except Exception as e:
-    #         print(f"Error fetching modules: {e}")
-    #         return []  # Return an empty list in case of error
-
-    
-    # def fetch_topics(self):
-    #     """
-    #     Fetches a list of topic names from the topics table in the database.
-
-    #     This method establishes a database connection, executes a query to retrieve
-    #     all topic names, and returns the results as a list. In case of an error
-    #     (e.g., connection failure or query issue), it catches the exception and returns
-    #     an empty list.
-
-    #     Returns:
-    #         list: A list of topic names fetched from the database. Returns an 
-    #             empty list if an error occurs during database interaction.
-    #     """
-    #     try:
-    #         with self.conn.cursor() as cursor:  
-    #             query = "SELECT topic_name FROM topics;"
-    #             cursor.execute(query)
-    #             topics = [row[0] for row in cursor.fetchall()]  #
-    #         return topics
-    #     except Exception as e:
-    #         print("Error fetching topics:", e)
-    #         return []  # Return an empty list in case of error
-        
-    # def fetch_questions(self, user_choice):
-    #     try:
-    #         with self.conn.cursor() as cursor:  # Automatically closes the cursor after the queries
-    #             if user_choice is None:
-    #                 query = "SELECT question_text FROM questions WHERE submodule_id IS NULL;"
-    #                 cursor.execute(query)
-    #             else:
-    #                 query = "SELECT question_text FROM questions JOIN submodules ON submodules.submodule_id=questions.submodule_id WHERE submodule_name=%s;"
-    #                 cursor.execute(query,(user_choice,))
-    #             questions = [row[0] for row in cursor.fetchall()]  # Fetch all rows and extract submodule names
-    #         return questions
-    #     except Exception as e:
-    #         print("Error fetching questions:", e)
-    #         return []  # Return an empty list in case of error
+        return self.fetch_data(query, (module,))    
+            
     def fetch_questions(self, user_choice):
         if user_choice is None:
             query = "SELECT question_text FROM questions WHERE submodule_id IS NULL;"
@@ -216,40 +122,58 @@ class DatabaseManager:
         return self.fetch_data(query, (user_choice,))
     
     def fetch_questions_difficulty_mode(self, difficulty):
-        query = "SELECT question_text FROM questions WHERE submodule_id is NULL AND difficulty=%s;"
+        query = "SELECT question_text FROM questions WHERE difficulty=%s;"
         return self.fetch_data(query, (difficulty,))
     
-    # def fetch_answers_from_question(self, question):
-    #     """
-    #     Retrieves all possible answers for a given question from the database.
-
-    #     Args:
-    #         question (str): The text of the question for which answers should be fetched.
-
-    #     Returns:
-    #         list: A list of answer choices related to the question.
-    #             Returns an empty list if an error occurs or no answers are found.
-
-    #     Raises:
-    #         Exception: Logs an error message if fetching answers fails.
-    #     """
-    #     try:
-    #         with self.conn.cursor() as cursor:  # Automatically closes the cursor after the queries
-    #             query = "SELECT answer FROM answers JOIN questions ON answers.question_id=questions.question_id WHERE question_text=%s;"
-    #             cursor.execute(query,(question,))
-    #             answers = [row[0] for row in cursor.fetchall()]  # Fetch all rows and extract submodule names
-    #         return answers
-    #     except Exception as e:
-    #         print("Error fetching questions:", e)
-    #         return []  # Return an empty list in case of error
-    
     def fetch_answers_from_question(self, question):
-        query = "SELECT answer FROM answers JOIN questions ON answers.question_id=questions.question_id WHERE question_text=%s;"
-        return self.fetch_data(query, (question,)) 
+        """
+        Fetches one correct answer and three random wrong answers for a given question.
+
+        This function retrieves a total of four answers (1 correct and 3 wrong) 
+        associated with a specific question. The correct answer is ensured to be 
+        included, and the wrong answers are selected randomly to provide variation.
+
+        Args:
+            question (str): The text of the question for which answers are fetched.
+
+        Returns:
+            list: A list of four answers as strings, shuffled in random order. The 
+                list always includes one correct answer and three wrong answers.
+
+        SQL Query Details:
+            - The first part fetches one correct answer using the condition 
+            `right_answer = TRUE`.
+            - The second part fetches three wrong answers using the condition 
+            `right_answer = FALSE`, and orders them randomly.
+            - The `UNION ALL` combines these results into a single result set.
+            - The use of `ORDER BY RANDOM()` ensures the wrong answers are randomized.
+            - `LIMIT` is used to restrict the number of answers fetched for each condition.
+        """
+        query = """
+        (
+            SELECT answer FROM answers 
+            JOIN questions ON answers.question_id = questions.question_id 
+            WHERE question_text = %s AND right_answer = TRUE
+            LIMIT 1
+        )
+        UNION ALL
+        (
+            SELECT answer FROM answers 
+            JOIN questions ON answers.question_id = questions.question_id 
+            WHERE question_text = %s AND right_answer = FALSE
+            ORDER BY RANDOM()
+            LIMIT 3
+        );
+        """
+        return self.fetch_data(query, (question, question))
                
     def check_user_answer(self, user_answer):
         query = "SELECT right_answer FROM answers WHERE answer=%s;"
         return self.fetch_data(query,(user_answer, ))
+
+    def get_question_explanation(self, question_text):
+        query = """SELECT explanation FROM questions WHERE question_text=%s"""
+        return self.fetch_data(query,(question_text, ))
         
 
     # def create_database_dict(self):

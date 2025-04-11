@@ -1,9 +1,10 @@
 import psycopg2
 import logging
+from managers.style_manager import Styler
 
 # Configure logging to write errors to a file
 logging.basicConfig(
-    filename='error.log',
+    filename='logs/error.log',
     level=logging.ERROR,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
@@ -52,7 +53,7 @@ class DatabaseManager:
                 port=self.port
             )
         except Exception as e:
-            print("Error connecting to the database:", e)
+            print(Styler.error_message("Error connecting to the database:", e))
 
     def close(self):
         """
@@ -68,7 +69,7 @@ class DatabaseManager:
             if self.conn:
                 self.conn.close()
         except Exception as e:
-            print("Error closing the database:", e)
+            print(Styler.error_message("Error closing the database:", e))
     
     def fetch_submodules_add_questions(self):
         query = """
@@ -174,47 +175,6 @@ class DatabaseManager:
     def get_question_explanation(self, question_text):
         query = """SELECT explanation FROM questions WHERE question_text=%s"""
         return self.fetch_data(query,(question_text, ))
-        
-
-    # def create_database_dict(self):
-    #     """
-    #     Creates a nested dictionary structure representing topics, modules, and submodules.
-
-    #     Args:
-    #         db_manager: An instance of a database manager that provides methods to fetch topics, modules, and submodules.
-
-    #     Returns:
-    #         dict: A dictionary where each topic has associated modules and submodules.
-    #             Returns an empty dictionary if no topics are found or an error occurs.
-    #     """
-    #     db_dict = {}
-    #     try:
-    #         topics = self.fetch_topics()
-    #         if not topics:
-    #             return {}  # Return empty dictionary if no topics found
-
-    #         for topic_index, topic in enumerate(topics, start=1):
-    #             topic_data = {"name": topic, "modules": {}}
-    #             modules = self.fetch_modules(topic)
-
-    #             if modules:
-    #                 for module_index, module in enumerate(modules, start=1):
-    #                     module_data = {"name": module, "submodules": []}
-    #                     submodules = self.fetch_submodules(module)
-
-    #                     if submodules:
-    #                         for submodule_index, submodule in enumerate(submodules, start=1):
-    #                             module_data["submodules"].append({"name": submodule, "index": submodule_index})
-    #                     topic_data["modules"][module_index] = module_data
-
-    #             db_dict[topic_index] = topic_data
-
-    #         return db_dict
-
-    #     except Exception as e:
-    #         print(f"Error creating topics dictionary: {e}")
-    #         return {}  # Return empty dictionary in case of error
-    
 
     def get_data(self, level, parent=None):
         """Fetches relevant category data based on user selection."""
@@ -373,7 +333,7 @@ class DatabaseManager:
                 return cursor.rowcount  # Return number of affected rows
         except psycopg2.errors.UniqueViolation:
             self.conn.rollback()
-            print(f"Error: Username '{user_data["username"]}' already exists. Please choose a different one.")
+            print(Styler.error_message(f"Error: Username '{user_data["username"]}' already exists. Please choose a different one."))
             return 0  # Indicate failure)
         except Exception as e:
             #revert changes made during the current transaction if this didn't execute well
@@ -528,4 +488,37 @@ class DatabaseManager:
             #revert changes made during the current transaction if this didn't execute well
             self.conn.rollback()
             logging.error(f"Failed to remove topic {topic_name}: {e}")
+            return -1  # Indicate failure)
+        
+    def remove_question(self, question):
+        query = f"""
+            DELETE FROM questions
+            WHERE question_text = %s;
+        """
+        try:
+            with self.conn.cursor() as cursor:
+                cursor.execute(query, (question,))
+                self.conn.commit()  # Ensure the update is saved
+                return cursor.rowcount  # Return number of affected rows
+        except Exception as e:
+            #revert changes made during the current transaction if this didn't execute well
+            self.conn.rollback()
+            logging.error(f"Failed to remove question {question}: {e}")
+            return -1  # Indicate failure)
+        
+    def update_description(self, category, new_description):
+        query = f"""
+            UPDATE {category}s
+            SET {category}_description = %s
+            WHERE {category}_name = %s;
+        """
+        try:
+            with self.conn.cursor() as cursor:
+                cursor.execute(query, (new_description, category))
+                self.conn.commit()  # Ensure the update is saved
+                return cursor.rowcount  # Return number of affected rows
+        except Exception as e:
+            #revert changes made during the current transaction if this didn't execute well
+            self.conn.rollback()
+            logging.error(f"Failed to update decsription from {category}: {e}")
             return -1  # Indicate failure)

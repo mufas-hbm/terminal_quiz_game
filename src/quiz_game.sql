@@ -1,8 +1,8 @@
 --create database
-CREATE DATABASE quiz_app;
+-- CREATE DATABASE quiz_game;
 
--- go into databse
-\c quiz_app
+-- -- go into databse
+-- \c quiz_game
 
 -- create table topic
 CREATE TABLE IF NOT EXISTS topics (
@@ -100,7 +100,7 @@ INSERT INTO users (name) VALUES
 
 -- Insert values into user_log table
 INSERT INTO user_log (user_id,username, hashed_password) VALUES 
-(1, 'admin', crypt('admin', gen_salt('bf'))),
+(1, 'admin', crypt('admin9!!', gen_salt('bf'))),
 (2, 'hector', crypt('hbassas', gen_salt('bf')));
 
 -- Insert values into topics table

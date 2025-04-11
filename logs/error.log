@@ -1,0 +1,8 @@
+
+2025-04-10 23:26:34,203 - ERROR - Database query failed: tuple index out of range
+2025-04-10 23:27:06,971 - ERROR - Database query failed: tuple index out of range
+2025-04-10 23:54:57,959 - ERROR - Failed to add new user: function gen_salt(unknown) does not exist
+LINE 3:             VALUES (5, 'pedro', crypt('pedro', gen_salt('bf'...
+                                                       ^
+HINT:  No function matches the given name and argument types. You might need to add explicit type casts.
+

@@ -1,8 +1,5 @@
 import random
-from menu import Menu
-from data_input import InputHandler
-from question_manager import QuestionManager
-import time
+from managers.style_manager import *
 
 class Quiz:
     def __init__(self, db_manager,input_handler=None):
@@ -41,29 +38,29 @@ class Quiz:
                     # Extract the user's selected answer
                     user_answer = answers[user_answer-1].strip()
                 else:
+                    print(Styler.error_message("\nChoice out of range, moving to next question without scoring\n"))
                     continue
                 
                 #extract column 'right_answer' (bool) from db
                 # Validate the user's answer against the correct answer stored in the database
                 check_answer = self.db_manager.check_user_answer(user_answer)[0]
                 if check_answer is True:
-                    print("\nCorrect! +1 Point\n")
+                    print(Styler.true_message("Correct! +1 Point"))
                     score += 1
                 else:
-                    print("\n False!\n")
-
+                    print(Styler.false_message("False!"))
                     #shows answer explanation to user
                     question_explanation = self.db_manager.get_question_explanation(question)[0] 
-                    print(f"\t**{question_explanation}**\n")
+                    print(Styler.explanation_message(f"**{question_explanation}**"))
 
             # Handle invalid inputs and moving on
             except (ValueError, TypeError, IndexError):
-                print("Invalid input! Moving to the next question.")
+                print(Styler.error_message("Invalid input! Moving to the next question."))
 
         # shows final score and add the data into the db
-        print(f"\nYour final score: {score}/{max_questions}")
+        print(Styler.confirmation_message(f"\nYour final score: {score}/{max_questions}"))
         self.db_manager.add_score_to_user(score, username)
-        print("\nYour total score and matches were updated")
+        print(Styler.confirmation_message("\nYour total score and matches were updated"))
               
 
 

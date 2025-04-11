@@ -22,6 +22,21 @@ This document outlines the class structure and functionality of the quiz applica
 * Data retrieval (fetching questions, user scores).
 * Data persistence (saving quiz results, adding new questions).
 
+### `QuestionManager`
+
+**Purpose:** Manages adding new questions to the database.
+
+**Responsibilities:**
+
+* Provides an interface for users to add new questions, answer options, and correct answers.
+* Validates user input.
+* Inserts new questions into the database using the `DatabaseManager`.
+
+**Key Functionality:**
+
+* Prompting user for question details (question text, answer options, correct answer).
+* Validating input data.
+* Adding new questions to the database.
 ### `Menu`
 
 **Purpose:** Manages user input and displays menus.
@@ -29,14 +44,12 @@ This document outlines the class structure and functionality of the quiz applica
 **Responsibilities:**
 
 * Presents interactive menus to the user.
-* Handles user input and validates it.
 * Navigates between different sections of the application.
 * Displays relevant information to the user.
 
 **Key Functionality:**
 
 * Displaying main menu, quiz menus, and question management menus.
-* Prompting user for input and validating it.
 * Directing program flow based on user input.
 
 ### `Quiz`
@@ -58,22 +71,6 @@ This document outlines the class structure and functionality of the quiz applica
 * Recording user answers.
 * Calculating and displaying quiz scores.
 * Saving quiz results to the database.
-
-### `QuestionManager`
-
-**Purpose:** Manages adding new questions to the database.
-
-**Responsibilities:**
-
-* Provides an interface for users to add new questions, answer options, and correct answers.
-* Validates user input.
-* Inserts new questions into the database using the `DatabaseManager`.
-
-**Key Functionality:**
-
-* Prompting user for question details (question text, answer options, correct answer).
-* Validating input data.
-* Adding new questions to the database.
 
 ## System Workflow
 

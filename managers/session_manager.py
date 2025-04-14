@@ -40,19 +40,26 @@ class SessionManager():
     def admin_update_data(self,current_user,wanted_operation):
         while True:
             choice = Menu.display_admin_menu(wanted_operation.capitalize(), 'from')
-            if choice == 1:
-                self.question_manager.update_question()
+            if choice == 1: 
+                try:
+                    self.question_manager.update_question()
+                except:
+                    print("NOT IMPLEMENTED, COMING SOON")
             elif choice == 2:
                 print("Update topic:")
-                self.admin_manager.update_topic()
+                self.admin_manager.update_category('topic')
             elif choice == 3:
                 print("Update module")
-                self.admin_manager.update_module()
+                self.admin_manager.update_category('module')
             elif choice == 4:
                 print("Update submodule") 
-                self.admin_manager.update_submodule() 
+                self.admin_manager.update_category('submodule')
             elif choice == 5:
-                print("Update user")
+                try:
+                    self.question_manager.category('user')
+                except:
+                    print("NOT IMPLEMENTED, COMING SOON")
+                continue
             elif choice == 6:
                 return 'back'
             elif choice == 7:

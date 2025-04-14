@@ -90,6 +90,14 @@ class DatabaseManager:
             logging.error(f"Database query failed: {e}")
             return []  # Return empty list on failure
     
+    def fetch_category(self, category):
+        """Fetch names from a category_table"""
+        query = f"""
+            SELECT {category}_name 
+            FROM {category}s;
+        """
+        return self.fetch_data(query, (category,))
+
     def fetch_topics(self):
         """Fetch topics dynamically."""
         return self.fetch_data("SELECT topic_name FROM topics;")
@@ -505,20 +513,32 @@ class DatabaseManager:
             self.conn.rollback()
             logging.error(f"Failed to remove question {question}: {e}")
             return -1  # Indicate failure)
-        
-    def update_description(self, category, new_description):
-        query = f"""
+    
+    def update_question(self, question):
+        pass
+
+    def update_user(self,username):
+        pass
+
+    def update_category(self, category, old_category_name, new_category_name, new_description):
+        query1 = f"""
+            UPDATE {category}s
+            SET {category}_name = %s
+            WHERE {category}_name = %s;
+        """
+        query2 = f"""
             UPDATE {category}s
             SET {category}_description = %s
             WHERE {category}_name = %s;
         """
         try:
             with self.conn.cursor() as cursor:
-                cursor.execute(query, (new_description, category))
+                cursor.execute(query1, (new_category_name, old_category_name))
+                cursor.execute(query2, (new_description, new_category_name))
                 self.conn.commit()  # Ensure the update is saved
                 return cursor.rowcount  # Return number of affected rows
         except Exception as e:
             #revert changes made during the current transaction if this didn't execute well
             self.conn.rollback()
-            logging.error(f"Failed to update decsription from {category}: {e}")
+            logging.error(f"Failed to update name or decscription from {category}: {e}")
             return -1  # Indicate failure)

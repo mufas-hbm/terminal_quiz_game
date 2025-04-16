@@ -72,6 +72,19 @@ class DatabaseManager:
             print(Styler.error_message("Error closing the database:", e))
     
     def fetch_submodules_add_questions(self):
+        """
+        Retrieves the names of all submodules from the database used to add questions.
+
+        Executes a query to fetch the `submodule_name` column from the `submodules` table 
+        and returns the result.
+
+        Args:
+            None
+
+        Returns:
+            list: A list containing the names of all submodules. 
+                  The format of the result depends on the implementation of the `fetch_data` method.
+        """
         query = """
                     SELECT submodule_name
                     FROM submodules;
@@ -240,6 +253,31 @@ class DatabaseManager:
         return self.fetch_data(query, (username, password))
 
     def track_user_progress(self, username):
+        """
+        Retrieves the progress statistics of a specified user from the database.
+
+        Executes a query to fetch the total score, last score, and total matches 
+        played by the user identified by their username. The information is obtained 
+        by joining the `users` and `user_log` tables on the user ID.
+
+        If the query fails, rolls back the transaction to maintain data integrity 
+        and logs the error for debugging purposes.
+
+        Args:
+            username (str): The username of the user whose progress statistics 
+                            are to be retrieved.
+
+        Returns:
+            list: A list containing the user's progress data in the format:
+                  [total_score, last_score, total_matches].
+                  Returns an empty list if an error occurs or no data is found.
+
+        Notes:
+            - Ensure the `username` corresponds to a valid entry in the `user_log` table.
+            - Handles database errors gracefully by rolling back the transaction 
+              and logging the exception.
+        """
+
         query = """
         SELECT total_score, last_score, total_matchs
         FROM users
@@ -257,6 +295,32 @@ class DatabaseManager:
             return []
 
     def add_score_to_user(self, score, user):
+        """
+        Updates the user's score and match statistics in the database.
+
+        This method performs the following:
+        - Increments the user's total score by the provided `score`.
+        - Updates the user's last score with the provided `score`.
+        - Increments the total matches played by the user by 1.
+        - Commits the changes to the database if the operation is successful.
+
+        In the event of an error:
+        - Rolls back the transaction to preserve data integrity.
+        - Logs the error for debugging purposes.
+
+        Args:
+            score (int): The score to be added to the user's total and set as the last score.
+            user (str): The name of the user whose score and match statistics will be updated.
+
+        Returns:
+            int: The number of rows affected by the update operation.
+                 Returns 0 if an error occurs during execution.
+
+        Notes:
+            - Ensure that the `user` argument matches an existing entry in the database.
+            - The `cursor.rowcount` indicates the number of rows successfully updated.
+        """
+
         query = """
             UPDATE users
             SET total_score = total_score + %s,
@@ -276,7 +340,27 @@ class DatabaseManager:
             return 0  # Indicate failure)
     
     def set_logged_status(self, name, is_logged_in):
-        """Updates the logged status of a user."""
+        """
+        Updates the logged-in status of a specified user.
+
+        Executes a query to update the `logged` column in the `users` table 
+        for the user identified by their name. Commits the changes to the 
+        database if the operation is successful. In case of an error, 
+        rolls back the transaction to maintain data integrity and logs 
+        the error for debugging purposes.
+
+        Args:
+            name (str): The name of the user whose logged status is being updated.
+            is_logged_in (bool): The new logged-in status to be applied to the user (True or False).
+
+        Returns:
+            int: The number of rows affected by the update operation.
+                 Returns 0 if an error occurs during execution.
+
+        Notes:
+            - Ensure that the `name` argument matches an existing user in the database.
+            - Handles errors gracefully by rolling back changes and logging the exception.
+        """
         query = """
             UPDATE users
             SET logged = %s
@@ -430,6 +514,29 @@ class DatabaseManager:
             return 0  # Indicate failure)
     
     def remove_user(self, username):
+        """
+        Deletes a user and their associated data from the database.
+
+        Executes a query to delete the user identified by their username. The deletion 
+        is performed on the `users` table, joined with the `user_log` table to ensure 
+        the correct user is targeted based on their username.
+
+        If the operation is successful, commits the transaction to save the changes. 
+        In case of an error, rolls back the transaction to maintain data integrity and 
+        logs the error for debugging purposes.
+
+        Args:
+            username (str): The username of the user to be deleted.
+
+        Returns:
+            int: The number of rows affected by the delete operation. 
+                 Returns -1 if an error occurs during execution.
+
+        Notes:
+            - The `username` must correspond to an existing entry in the `user_log` table.
+            - Handles errors gracefully by reverting changes and logging the exception.
+        """
+
         query = f"""
             DELETE FROM users
             WHERE user_id IN (
@@ -451,6 +558,24 @@ class DatabaseManager:
             return -1  # Indicate failure)
         
     def remove_submodule(self, submodule_name):
+        """
+        Deletes a specified submodule from the database.
+
+        Executes a query to remove the submodule identified by its name from the `submodules` table.
+        If the deletion is successful, commits the changes to the database. In case of an error, 
+        rolls back the transaction to preserve data integrity and logs the error for troubleshooting.
+
+        Args:
+            submodule_name (str): The name of the submodule to be deleted.
+
+        Returns:
+            int: The number of rows affected by the delete operation. 
+                 Returns -1 if an error occurs during execution.
+
+        Notes:
+            - Ensure that the `submodule_name` matches the exact entry in the database.
+            - Handles errors gracefully by rolling back changes and logging the exception.
+        """
         query = f"""
             DELETE FROM submodules
             WHERE submodule_name = %s;
@@ -467,6 +592,25 @@ class DatabaseManager:
             return -1  # Indicate failure)
     
     def remove_module(self, module_name):
+        """
+        Removes a specified module from the database.
+
+        Executes a query to delete the module identified by its name from the `modules` table.
+        If the operation succeeds, the changes are committed to the database. In case of 
+        an error, the transaction is rolled back to preserve data integrity, and the 
+        error is logged for debugging purposes.
+
+        Args:
+            module_name (str): The name of the module to be deleted.
+
+        Returns:
+            int: The number of rows affected by the delete operation. 
+                 Returns -1 if an error occurs during the execution.
+
+        Notes:
+            - Ensure that the `module_name` matches exactly with the corresponding entry in the database.
+            - Error handling includes rollback to prevent partial updates.
+        """
         query = f"""
             DELETE FROM modules
             WHERE module_name = %s;
@@ -483,6 +627,25 @@ class DatabaseManager:
             return -1  # Indicate failure)
     
     def remove_topic(self, topic_name):
+        """
+        Removes a specified topic from the database.
+
+        Executes a query to delete the topic identified by its name from the `topics` table.
+        If the operation succeeds, the changes are committed to the database. In case of 
+        an error, the transaction is rolled back to preserve data integrity, and the 
+        error is logged for debugging purposes.
+
+        Args:
+            topic_name (str): The name of the topic to be deleted.
+
+        Returns:
+            int: The number of rows affected by the delete operation. 
+                 Returns -1 if an error occurs during the execution.
+
+        Notes:
+            - Ensure that the `topic_name` matches exactly with the corresponding entry in the database.
+            - Error handling includes rollback to prevent partial updates.
+        """
         query = f"""
             DELETE FROM topics
             WHERE topic_name = %s;
@@ -499,6 +662,24 @@ class DatabaseManager:
             return -1  # Indicate failure)
         
     def remove_question(self, question):
+        """
+        Removes a specified question from the database.
+
+        Executes a query to delete the question identified by its text from the `questions` table.
+        If the operation is successful, commits the changes to the database. Handles errors by 
+        rolling back the transaction to maintain data integrity and logs the error for debugging.
+
+        Args:
+            question (str): The text of the question to be deleted.
+
+        Returns:
+            int: The number of rows affected by the delete operation. 
+                 Returns -1 if an error occurs during execution.
+
+        Notes:
+            - Ensure the `question` argument matches the exact text in the database.
+            - Logs errors for troubleshooting purposes if the deletion fails.
+        """
         query = f"""
             DELETE FROM questions
             WHERE question_text = %s;
@@ -514,13 +695,178 @@ class DatabaseManager:
             logging.error(f"Failed to remove question {question}: {e}")
             return -1  # Indicate failure)
     
-    def update_question(self, question):
-        pass
+    def update_question(self, old_question_text,submodule_id, new_question_text, difficulty, explanation, hint):
+        """
+        Updates an existing question in the database with new details.
 
-    def update_user(self,username):
-        pass
+        The method performs the following:
+        - Updates the question text, associated submodule ID, difficulty level, 
+          explanation, and hint for a specific question identified by its 
+          current text (`old_question_text`).
+        - Commits the changes to the database if the update is successful.
+
+        In the event of an error:
+        - Rolls back the transaction to maintain data integrity.
+        - Logs the error for debugging purposes.
+
+        Args:
+            old_question_text (str): The current text of the question to be updated.
+            submodule_id (int): The ID of the submodule associated with the question.
+            new_question_text (str): The updated text for the question.
+            difficulty (str): The difficulty level of the question (e.g., 'easy', 'medium', 'hard').
+            explanation (str): The updated explanation for the question.
+            hint (str): The updated hint for the question.
+
+        Returns:
+            int: The number of rows affected by the update operation. Returns -1 if an error occurs.
+
+        Notes:
+            - Ensure that the `submodule_id` corresponds to a valid submodule in the database.
+            - The `cursor.rowcount` indicates the number of rows successfully updated.
+        """
+
+        query = f"""
+            UPDATE questions
+            SET question_text = %s, submodule_id = %s, difficulty = %s, explanation = %s, hint = %s
+            WHERE question_text = %s;
+        """
+        try:
+            with self.conn.cursor() as cursor:
+                cursor.execute(query, (new_question_text, submodule_id, difficulty, explanation, hint, old_question_text))
+                self.conn.commit()  # Ensure the update is saved
+                return cursor.rowcount  # Return number of affected rows
+        except Exception as e:
+            #revert changes made during the current transaction if this didn't execute well
+            self.conn.rollback()
+            logging.error(f"Failed to update question: {e}")
+            return -1  # Indicate failure)
+    
+    def fetch_question(self, question_text):
+        """
+        Fetches the ID of a specified submodule from the database.
+
+        Executes a query to retrieve the `submodule_id` for the given `submodule_name` 
+        from the `submodules` table.
+
+        Args:
+            submodule_name (str): The name of the submodule whose ID is to be retrieved.
+
+        Returns:
+            tuple: The result of the query containing the submodule ID, or None if no match is found.
+        """
+        query = """SELECT question_text from questions where question_text=%s"""
+        return self.fetch_data(query, (question_text,))
+    
+    def fetch_submodule_id(self, submodule_name):
+        query = """SELECT submodule_id from submodules where submodule_name=%s"""
+        return self.fetch_data(query, (submodule_name,))
+    
+    def fetch_user(self,username):
+        """
+        Retrieves the user ID for a given username.
+
+        Executes a database query to fetch the user ID from the `users` table, 
+        joining it with the `user_log` table based on matching user IDs.
+
+        Args:
+            username (str): The username of the user whose ID is to be fetched.
+
+        Returns:
+            tuple: The result of the query containing the user ID, or None if no match is found.
+        """
+        query = """SELECT users.user_id from users JOIN user_log ON users.user_id=user_log.user_id where username=%s"""
+        return self.fetch_data(query, (username,))
+
+    def update_user(self, user_id, current_user, arg_to_update, value_to_update):
+        """
+        Updates a specific attribute of a user in the database.
+
+        Dynamically constructs the appropriate SQL query based on the `arg_to_update` value. 
+        Handles updates for `name`, `username`, and `password`, committing the changes to 
+        the database if successful. Rolls back the transaction and logs errors in case of failure.
+
+        Args:
+            user_id (int): The unique ID of the user to be updated.
+            current_user (str): The current username of the user.
+            arg_to_update (str): The name attribute being updated.
+            value_to_update (str): The new value of the chosed atribute being updated.
+
+        Returns:
+            int: The number of rows affected by the update operation. 
+                 Returns 0 in case of errors or if the operation fails.
+
+        Notes:
+            - Handles `name` updates in the `users` table.
+            - Handles `username` and `password` updates in the `user_log` table.
+            - Validates inputs and ensures rollback on errors.
+        """
+        # Define variables for dynamic query construction
+        query = None
+        query_args = None
+        
+        # Determine which query to execute based on the attribute to update
+        if arg_to_update == "name":
+            query = """
+                UPDATE users 
+                SET name=%s
+                WHERE user_id=%s;
+            """
+            query_args = (value_to_update, user_id)
+        elif arg_to_update == "username":
+            query = """
+                UPDATE user_log
+                SET username=%s 
+                WHERE username=%s;
+            """
+            query_args = (value_to_update, current_user)
+        elif arg_to_update == "hashed_password":
+            query = """
+                UPDATE user_log
+                SET hashed_password=crypt(%s, gen_salt('bf'))  
+                WHERE user_id=%s;
+            """
+            query_args = (value_to_update, user_id)
+        try:
+            with self.conn.cursor() as cursor:
+                # Execute the dynamic query with arguments
+                cursor.execute(query, query_args)
+                self.conn.commit()  # Ensure the update is saved
+                return cursor.rowcount  # Return number of affected rows
+        except psycopg2.errors.UniqueViolation as e:
+            self.conn.rollback()
+            print(Styler.error_message(f"Username '{value_to_update}' already exists."))
+            logging.error(f"Failed to update user {current_user}: {e}")
+            return -1  # Return a specific error code for this case
+        except Exception as e:
+            # Revert changes made during the current transaction if this didn't execute well
+            self.conn.rollback()
+            logging.error(f"Failed to update user {current_user}: {e}")
+            return 0  # Indicate failure
+        
 
     def update_category(self, category, old_category_name, new_category_name, new_description):
+        """
+        Updates the name and description of a specified category in the database.
+
+        The method performs the following:
+        - Updates the name of the given category (e.g., 'topic', 'module', 'submodule') 
+          by replacing `old_category_name` with `new_category_name`.
+        - Updates the description of the category with `new_description`.
+        - Commits changes to the database upon successful execution.
+
+        Handles errors by rolling back the transaction and logging the error message 
+        to ensure data integrity.
+
+        Args:
+            category (str): The category type to be updated (e.g., 'topic', 'module', 'submodule').
+            old_category_name (str): The current name of the category to be updated.
+            new_category_name (str): The new name for the category.
+            new_description (str): The new description to be applied to the category.
+
+        Returns:
+            int: The number of rows affected by the update operation, or -1 if the update fails.
+        """
+
         query1 = f"""
             UPDATE {category}s
             SET {category}_name = %s
